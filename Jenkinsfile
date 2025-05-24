@@ -2,50 +2,45 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "webappcal"
-        CONTAINER_NAME = "webappcal-container"
+        IMAGE_NAME = "calculator-app"
+        CONTAINER_NAME = "calculator-container"
     }
 
     stages {
         stage('Clone Repository') {
             steps {
                 echo 'Cloning project...'
-                // Assuming Jenkins will pull this from GitHub if hosted
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo "Building Docker image..."
+                echo 'Building Docker image...'
                 sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
         stage('Stop Previous Container') {
             steps {
-                echo "Stopping existing container if exists..."
+                echo 'Stopping and removing previous container if exists...'
                 sh '''
-                docker rm -f $CONTAINER_NAME || true
+                    docker stop $CONTAINER_NAME || true
+                    docker rm $CONTAINER_NAME || true
                 '''
             }
         }
 
         stage('Run New Container') {
             steps {
-                echo "Starting container..."
-                sh '''
-                docker run -d -p 8080:8081 --name $CONTAINER_NAME $IMAGE_NAME
-                '''
+                echo 'Running new container...'
+                sh 'docker run -d -p 8090:8080 --name $CONTAINER_NAME $IMAGE_NAME'
             }
         }
     }
 
     post {
-        success {
-            echo "Deployment complete. App should be live on port 8080."
-        }
         failure {
-            echo "Something went wrong!"
+            echo 'Something went wrong!'
         }
     }
 }
